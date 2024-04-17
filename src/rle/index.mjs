@@ -28,7 +28,10 @@ switch (Deno.args[0]) {
 		// Decompress or decode
 		let length = parseInt(Deno.args[1]);
 		let fsFile = await Deno.open(Deno.args[2], {read: true, create: false});
+		let decoder = new RLEDecoder(length);
 		let fsTarget = await Deno.open(`${Deno.args[2]}.bak`, {read: true, write: true, createNew: true});
+		let rleStream = decoder.decode(fsFile.readable);
+		await rleStream.pipeTo(fsTarget.writable);
 		break;
 	};
 	default: {

@@ -31,7 +31,7 @@ let RLEEncoder = class {
 		(async () => {
 			let undone = true;
 			let lastByte = 0, sameCount = 0;
-			let totalOffset = 0;
+			//let totalOffset = 0;
 			while (undone) {
 				let {done, value} = await reader.read();
 				undone = !done;
@@ -69,7 +69,7 @@ let RLEEncoder = class {
 							//console.error(`Emit source byte: ${e} [${totalOffset}]`);
 							newController.enqueue(emitSingleByte(e));
 						};
-						totalOffset ++;
+						//totalOffset ++;
 					};
 				};
 				if (sameCount >= length) {
@@ -95,7 +95,57 @@ let RLEDecoder = class {
 		};
 		this.#length = length;
 	};
-	decode(source) {};
+	decode(source) {
+		let length = this.#length;
+		let reader = source.getReader();
+		let newController, newStream = new ReadableStream({
+			start: (controller) => {
+				newController = controller;
+			}
+		});
+		(async () => {
+			let lastByte = 0, sameCount = 0;
+			let undone = true;
+			let totalOffset = 0;
+			while (undone) {
+				let {done, value} = await reader.read();
+				undone = !done;
+				if (value == null || value == undefined) {
+					continue;
+				};
+				if (value.constructor != Uint8Array && value.constructor != Uint8ClampedArray) {
+					throw(new Error("Invalid input source"));
+				};
+				if (undone) {
+					for (let i = 0; i < value.length; i ++) {
+						let e = value[i];
+						if (sameCount < length) {
+							newController.enqueue(emitSingleByte(e));
+							if (lastByte == e) {
+								sameCount ++;
+								console.error(`Discovered same byte with count: ${e} * ${sameCount} [${totalOffset}]`);
+							} else {
+								console.error(`A different byte: ${lastByte} -> ${e} [${totalOffset}]`);
+								lastByte = e;
+								sameCount = 1;
+							};
+						} else {
+							console.error(`Emitting byte with length: ${lastByte} * ${e} [${totalOffset}]`);
+							let u8Buf = new Uint8Array(e);
+							u8Buf.fill(lastByte);
+							newController.enqueue(u8Buf);
+							sameCount = 0;
+						};
+						totalOffset ++;
+					};
+				};
+			};
+			// Release the lock and close the stream when done
+			newController.close();
+			reader.releaseLock();
+		})();
+		return newStream;
+	};
 };
 
 export {
