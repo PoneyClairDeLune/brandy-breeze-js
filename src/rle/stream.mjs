@@ -123,14 +123,14 @@ let RLEDecoder = class {
 							newController.enqueue(emitSingleByte(e));
 							if (lastByte == e) {
 								sameCount ++;
-								console.error(`Discovered same byte with count: ${e} * ${sameCount} [${totalOffset}]`);
+								//console.error(`Discovered same byte with count: ${e} * ${sameCount} [${totalOffset}]`);
 							} else {
-								console.error(`A different byte: ${lastByte} -> ${e} [${totalOffset}]`);
+								//console.error(`A different byte: ${lastByte} -> ${e} [${totalOffset}]`);
 								lastByte = e;
 								sameCount = 1;
 							};
 						} else {
-							console.error(`Emitting byte with length: ${lastByte} * ${e} [${totalOffset}]`);
+							//console.error(`Emitting byte with length: ${lastByte} * ${e} [${totalOffset}]`);
 							let u8Buf = new Uint8Array(e);
 							u8Buf.fill(lastByte);
 							newController.enqueue(u8Buf);
