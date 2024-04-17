@@ -6,3 +6,8 @@ build
 .docker_name
 dist/*.js
 dist/*.css
+*.rle
+*.bwt
+*.mtf
+*.lzss
+*.bak
