@@ -13,6 +13,12 @@ let RLEEncoder = class {
 	get length() {
 		return this.#length;
 	};
+	constructor(length = 4) {
+		if (length > 255 || length < 1) {
+			throw(new RangeError(`Invalid length`))
+		};
+		this.#length = length;
+	};
 	encode(source) {
 		let length = this.#length;
 		let maxWindow = encodeWindow + length; // This value shouldn't exceed 255 on strongly-typed implementations
@@ -41,33 +47,33 @@ let RLEEncoder = class {
 						if (lastByte == e) {
 							sameCount ++;
 							if (sameCount <= length) {
-								console.error(`Emit source byte: ${e} [${totalOffset}]`);
+								//console.error(`Emit source byte: ${e} [${totalOffset}]`);
 								newController.enqueue(emitSingleByte(e));
 							} else if (sameCount < maxWindow) {
-								console.error(`Same byte count: ${e} (${sameCount - length}, ${sameCount}) [${totalOffset}]`);
+								//console.error(`Same byte count: ${e} (${sameCount - length}, ${sameCount}) [${totalOffset}]`);
 							} else {
-								console.error(`Emit count byte: ${sameCount - length} [${totalOffset}]`);
+								//console.error(`Emit count byte: ${sameCount - length} [${totalOffset}]`);
 								newController.enqueue(emitSingleByte(sameCount - length));
 								//console.error(`Emit source byte: ${e} [${totalOffset}]`);
-								console.error(`Force reset count for byte: ${e} [${totalOffset}]`);
+								//console.error(`Force reset count for byte: ${e} [${totalOffset}]`);
 								sameCount = 0;
 							};
 						} else {
 							if (sameCount >= length) {
-								console.error(`Emit count byte: ${sameCount - length} [${totalOffset}]`);
+								//console.error(`Emit count byte: ${sameCount - length} [${totalOffset}]`);
 								newController.enqueue(emitSingleByte(sameCount - length));
 							};
-							console.error(`Reset count for byte: ${e} [${totalOffset}]`);
+							//console.error(`Reset count for byte: ${e} [${totalOffset}]`);
 							lastByte = e;
 							sameCount = 1;
-							console.error(`Emit source byte: ${e} [${totalOffset}]`);
+							//console.error(`Emit source byte: ${e} [${totalOffset}]`);
 							newController.enqueue(emitSingleByte(e));
 						};
 						totalOffset ++;
 					};
 				};
 				if (sameCount >= length) {
-					console.error(`Emit count byte: ${sameCount - length}`);
+					//console.error(`Emit count byte: ${sameCount - length}`);
 					newController.enqueue(emitSingleByte(sameCount - length));
 				};
 			};
@@ -77,11 +83,20 @@ let RLEEncoder = class {
 		})();
 		return newStream;
 	};
+};
+let RLEDecoder = class {
+	#length = 4; // Default for Bzip2
+	get length() {
+		return this.#length;
+	};
 	constructor(length = 4) {
+		if (length > 255 || length < 1) {
+			throw(new RangeError(`Invalid length`))
+		};
 		this.#length = length;
 	};
+	decode(source) {};
 };
-let RLEDecoder = class {};
 
 export {
 	RLEEncoder,
