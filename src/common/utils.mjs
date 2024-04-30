@@ -47,7 +47,7 @@ let crc32Sum = (crc, u8Buf) => {
 		throw(new TypeError(`Input is not Uint8Array`));
 	};
 	for (let i = 0; i < u8Buf.length; i ++) {
-		crc = crc32Table[((crc & 255) ^ u8Buf[i]) & 255 ^ (crc >>> 8)];
+		crc = crc32Table[((crc & 255) ^ u8Buf[i]) & 255] ^ (crc >>> 8);
 	};
 	return crc;
 };

@@ -10,6 +10,7 @@ let LZSSEncoder = class {
 		});
 		(async () => {
 			let undone = true;
+			let u8Buf;
 			while (undone) {
 				let {done, value} = await reader.read();
 				undone = !done;
